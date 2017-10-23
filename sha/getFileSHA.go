@@ -1,4 +1,4 @@
-package main
+package sha
 
 import (
 	"crypto/sha256"
@@ -9,7 +9,8 @@ import (
 	"strings"
 )
 
-func getSHA(filename string) string {
+// GetFileSHA 指定ファイルのSHA256を算出
+func GetFileSHA(filename string) string {
 	f, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)

@@ -1,12 +1,17 @@
+// 指定フォルダより重複ファイルを探しリストにする
 package main
 
 import (
+	"duplicate/sha"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 )
 
+// File ファイルの構造体。
+// Path ファイルパス
+// SHA256 そのファイルのSHA256
 type File struct {
 	Path   string
 	SHA256 string
@@ -28,7 +33,7 @@ func dirList(startDir string) (result []File, err error) {
 		path := filepath.Join(pwd, startDir, file.Name())
 		f := File{
 			Path:   path,
-			SHA256: getSHA(path),
+			SHA256: sha.GetFileSHA(path),
 		}
 		files = append(files, f)
 	}
@@ -36,14 +41,23 @@ func dirList(startDir string) (result []File, err error) {
 	return
 }
 
-func dupList(fileList []File) (result [][]File, err error) {
+func dupList(fileList []File) (result [][]File) {
+	shaMapList := map[string][]File{}
+	for _, file := range fileList {
+		shaMapList[file.SHA256] = append(shaMapList[file.SHA256], file)
+	}
+	for _, value := range shaMapList {
+		if len(value) > 1 {
+			result = append(result, value)
+		}
+	}
 	return
 }
 
 func main() {
 	result, _ := dirList("testdir")
-	list, _ := dupList(result)
+	list := dupList(result)
 	fmt.Println(result)
 	fmt.Println(list)
-	// fmt.Println(getSHA("testdir/a.txt"))
+	// fmt.Println(sha.GetFileSHA("testdir/a.txt"))
 }
