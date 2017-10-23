@@ -1,15 +1,10 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
-	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 type File struct {
@@ -39,20 +34,6 @@ func dirList(startDir string) (result []File, err error) {
 	}
 	result = files
 	return
-}
-
-func getSHA(filename string) string {
-	f, err := os.Open(filename)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
-		log.Fatal(err)
-	}
-	return strings.ToUpper(hex.EncodeToString(h.Sum(nil)))
 }
 
 func main() {
