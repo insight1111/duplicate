@@ -73,3 +73,26 @@ func TestDirList(t *testing.T) {
 		t.Errorf("a.txtのSHA256がマッチしていません r:%v e:%v", rSHA, aSHA)
 	}
 }
+
+func TestDupList(t *testing.T) {
+	result, _ := dirList("testdir")
+	dup := dupList(result)
+
+	if len(dup) == 0 {
+		t.Errorf("dupに何も入っていません")
+	}
+
+	expect := 0
+	r1 := regexp.MustCompile(`a\.txt`)
+	r2 := regexp.MustCompile(`d\.txt`)
+	for _, file := range dup[0] {
+		if r1.MatchString(file.Path) {
+			expect += 1
+		} else if r2.MatchString(file.Path) {
+			expect += 1
+		}
+	}
+	if expect != 2 {
+		t.Errorf("a.txtまたはd.txtが重複結果に入っていません")
+	}
+}
