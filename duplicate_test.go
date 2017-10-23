@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -72,4 +73,14 @@ func TestDirList(t *testing.T) {
 	if expect == 0 {
 		t.Errorf("a.txtのSHA256がマッチしていません r:%v e:%v", rSHA, aSHA)
 	}
+}
+
+func TestDupList(t *testing.T) {
+	result, _ := dirList("testdir")
+	dup, _ := dupList(result)
+
+	if len(dup) == 0 {
+		t.Errorf("dupに何も入っていません")
+	}
+	fmt.Println(dup)
 }
