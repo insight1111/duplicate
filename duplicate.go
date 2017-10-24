@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"time"
 )
 
@@ -36,18 +37,25 @@ type DupFiles struct {
 
 func dirList(startDir string) (result []File, err error) {
 	_result, err := ioutil.ReadDir(startDir)
-	pwd, _ := os.Getwd()
+	// pwd, _ := os.Getwd()
 	if err != nil {
 		return
 	}
 	files := []File{}
 	for _, file := range _result {
+		fi, err := os.Lstat(filepath.Join(startDir, file.Name()))
+		if err != nil {
+			log.Fatal(err)
+		}
 		if file.IsDir() {
 			_t, _ := dirList(filepath.Join(startDir, file.Name()))
 			files = append(files, _t...)
 			continue
+		} else if fi.Mode()&os.ModeSymlink != 0 {
+			continue
 		}
-		path := filepath.Join(pwd, startDir, file.Name())
+		// path := filepath.Join(pwd, startDir, file.Name())
+		path := filepath.Join(startDir, file.Name())
 		f := File{
 			Path:   path,
 			SHA256: utils.GetFileSHA(path),
@@ -99,8 +107,39 @@ func makeDupFiles(files []File) DupFiles {
 	return d
 }
 
+func replaceSymlink(dups []DupFiles) {
+	for _, d := range dups {
+		o := d.Original
+		dir, filename := filepath.Split(o)
+		orig := regexp.MustCompile(`(original)`)
+		var ren string
+		if !orig.MatchString(filename) {
+			ext := filepath.Ext(filename)
+			bname := filename[:len(filename)-len(ext)]
+			ren = bname + "(original)" + ext
+		} else {
+			ren = filename
+		}
+		renpath := filepath.Join(dir, ren)
+		os.Rename(o, renpath)
+		for _, f := range d.Files {
+			if f.Path != o {
+				ext := filepath.Ext(f.Path)
+				bname := f.Path[:len(f.Path)-len(ext)]
+				r := bname + ".lnk"
+				os.Remove(r)
+				err := os.Symlink(renpath, r)
+				if err != nil {
+					log.Fatal(err)
+				}
+				os.Remove(f.Path)
+			}
+		}
+	}
+}
+
 func main() {
-	list, err := dirList("testdir")
+	list, err := dirList(`C:\Users\eisuke\go\src\duplicate\testdir`)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -121,9 +160,7 @@ func main() {
 	if stdin.Text() != "y" {
 		return
 	}
-	fmt.Println("yes!")
-	err = os.Symlink(`C:\Users\saito0924\go\src\duplicate\testdir\a.txt`, `C:\Users\saito0924\go\src\duplicate\testdir\a.lnk`)
-	if err != nil {
-		log.Fatal(err)
-	}
+	fmt.Println("処理を開始します")
+	replaceSymlink(dup)
+	fmt.Println("完了しました")
 }
