@@ -2,13 +2,13 @@
 package main
 
 import (
-	"duplicate/sha"
+	"bufio"
+	"duplicate/utils"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
-	"syscall"
 	"time"
 )
 
@@ -50,9 +50,9 @@ func dirList(startDir string) (result []File, err error) {
 		path := filepath.Join(pwd, startDir, file.Name())
 		f := File{
 			Path:   path,
-			SHA256: sha.GetFileSHA(path),
+			SHA256: utils.GetFileSHA(path),
 			Size:   file.Size(),
-			Create: getCreateTime(path),
+			Create: utils.GetCreateTime(path),
 		}
 		files = append(files, f)
 	}
@@ -99,37 +99,31 @@ func makeDupFiles(files []File) DupFiles {
 	return d
 }
 
-func getCreateTime(file string) time.Time {
-	f, err := os.Stat(file)
+func main() {
+	list, err := dirList("testdir")
 	if err != nil {
 		log.Fatal(err)
 	}
-	stat := f.Sys().(*syscall.Win32FileAttributeData).CreationTime.Nanoseconds()
-	return time.Unix(0, stat)
-}
+	dup := dupList(list)
+	tf := 0
+	fz := int64(0)
+	wz := int64(0)
+	for _, d := range dup {
+		tf += len(d.Files)
+		fz += d.TotalSize
+		wz += d.WasteSize
+	}
 
-func main() {
-	// result, _ := dirList("testdir")
-	// list := dupList(result)
-	// fmt.Println(result)
-	// fmt.Println(list)
-	// fmt.Println(sha.GetFileSHA("testdir/a.txt"))
-	// // fi, err := os.Stat("testdir/a.txt")
-	// // stat := fi.Sys().(*syscall.Win32FileAttributeData)
-	// // if err != nil {
-	// // 	fmt.Println(err)
-	// // 	return
-	// // }
-	// //
-	// // fmt.Println(time.Unix(0, stat.CreationTime.Nanoseconds()))
-	// fmt.Println(time.Unix(1267867237, 0))
-	// fmt.Println(getCreateTime("testdir/a.txt"))
-	// f := File{}
-	// fmt.Println(f.Size)
-	// a1 := getCreateTime("c:/users/saito0924/go/src/duplicate/testdir/a.txt")
-	// a2 := getCreateTime("c:/users/saito0924/go/src/duplicate/testdir/c.txt")
-	// fmt.Println(a1, a2)
-	// fmt.Println(a1.Before(a2))
-	t := time.Now()
-	fmt.Println(t)
+	fmt.Printf("トータル重複ファイル数: %v ファイルサイズ: %vbyte (うち無駄なファイルサイズ: %vbyte)\n", tf, fz, wz)
+	fmt.Print("重複ファイルをショートカットに置き換えますか？(y/n)")
+	stdin := bufio.NewScanner(os.Stdin)
+	stdin.Scan()
+	if stdin.Text() != "y" {
+		return
+	}
+	fmt.Println("yes!")
+	err = os.Symlink(`C:\Users\saito0924\go\src\duplicate\testdir\a.txt`, `C:\Users\saito0924\go\src\duplicate\testdir\a.lnk`)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
