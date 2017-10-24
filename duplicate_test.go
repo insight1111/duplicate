@@ -16,10 +16,10 @@ func TestDirList(t *testing.T) {
 		t.Errorf("結果は構造体のスライスではありません。実際は %sです", reflect.TypeOf(result))
 	}
 
-	// ファイル数は4(再帰調査)
-	expect := 4
+	// ファイル数は5(再帰調査)
+	expect := 5
 	if len(result) != expect {
-		t.Errorf("受け取ったファイル数が違います　r:%#v e:%#v", len(result), expect)
+		t.Errorf("受け取ったファイル数が違います　get:%#v expect:%#v", len(result), expect)
 	}
 
 	// 結果にはd.txtを含む
@@ -72,6 +72,7 @@ func TestDirList(t *testing.T) {
 	if expect == 0 {
 		t.Errorf("a.txtのSHA256がマッチしていません r:%v e:%v", rSHA, aSHA)
 	}
+
 }
 
 func TestDupList(t *testing.T) {
@@ -82,17 +83,25 @@ func TestDupList(t *testing.T) {
 		t.Errorf("dupに何も入っていません")
 	}
 
+	// 重複ファイルはきちんと結果に入っているか
 	expect := 0
 	r1 := regexp.MustCompile(`a\.txt`)
 	r2 := regexp.MustCompile(`d\.txt`)
-	for _, file := range dup[0] {
+	for _, file := range dup[0].Files {
 		if r1.MatchString(file.Path) {
-			expect += 1
+			expect++
 		} else if r2.MatchString(file.Path) {
-			expect += 1
+			expect++
 		}
 	}
-	if expect != 2 {
-		t.Errorf("a.txtまたはd.txtが重複結果に入っていません")
+	if expect < 2 {
+		t.Errorf("a.txtまたはd.txtが重複結果に入っていません get %#v", dup[0])
 	}
+
+	// オリジナルはa.txt
+	if r1.MatchString(dup[0].Original) == false {
+		t.Errorf("オリジナルはa.txtではありません get %#v", dup[0].Original)
+	}
+	// fmt.Printf("%+v\n", dup[0])
+
 }
