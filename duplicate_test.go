@@ -9,7 +9,8 @@ import (
 )
 
 func TestDirList(t *testing.T) {
-	result, _ := dirList(`C:\Users\eisuke\go\src\duplicate\testdir`)
+	pwd, _ := os.Getwd()
+	result, _ := dirList(filepath.Join(pwd, "testdir"))
 	dir, _ := os.Getwd()
 
 	if reflect.TypeOf(result).Kind() != reflect.Slice {

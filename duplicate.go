@@ -4,6 +4,7 @@ package main
 import (
 	"bufio"
 	"duplicate/utils"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -139,7 +140,23 @@ func replaceSymlink(dups []DupFiles) {
 }
 
 func main() {
-	list, err := dirList(`C:\Users\eisuke\go\src\duplicate\testdir`)
+	// fs := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	// 	flag.Usage = func() {
+	// 		fmt.Fprintf(os.Stderr, `
+	// Usage of %s:
+	//   %s [OPTIONS] AGRS...
+	// Options\n`, os.Args[0], os.Args[0])
+	// 		flag.PrintDefaults()
+	// 	}
+	var (
+		filePath = flag.String("p", ".", "directory path")
+		silent   = flag.Bool("y", false, "no confirm, always select yes.")
+	)
+	// filePath := os.Args[1]
+	flag.Parse()
+	// fmt.Printf("filepath %#v y-option %#v", filePath, *silent)
+	// pwd, _ := os.Getwd()
+	list, err := dirList(*filePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -154,11 +171,13 @@ func main() {
 	}
 
 	fmt.Printf("トータル重複ファイル数: %v ファイルサイズ: %vbyte (うち無駄なファイルサイズ: %vbyte)\n", tf, fz, wz)
-	fmt.Print("重複ファイルをショートカットに置き換えますか？(y/n)")
-	stdin := bufio.NewScanner(os.Stdin)
-	stdin.Scan()
-	if stdin.Text() != "y" {
-		return
+	if !*silent {
+		fmt.Print("重複ファイルをショートカットに置き換えますか？(y/n)")
+		stdin := bufio.NewScanner(os.Stdin)
+		stdin.Scan()
+		if stdin.Text() != "y" {
+			return
+		}
 	}
 	fmt.Println("処理を開始します")
 	replaceSymlink(dup)
