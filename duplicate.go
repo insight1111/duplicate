@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/ktat/go-pager"
+	"gopkg.in/cheggaaa/pb.v1"
 )
 
 // File ファイルの構造体。
@@ -46,8 +47,11 @@ func dirList(startDir string) (result []File, err error) {
 	if err != nil {
 		return
 	}
+	count := len(_result)
+	bar := pb.StartNew(count)
 	files := []File{}
 	for _, file := range _result {
+		bar.Increment()
 		fi, err := os.Lstat(filepath.Join(startDir, file.Name()))
 		if err != nil {
 			log.Fatal(err)
@@ -68,7 +72,9 @@ func dirList(startDir string) (result []File, err error) {
 			Create: utils.GetCreateTime(path),
 		}
 		files = append(files, f)
+		time.Sleep(time.Millisecond)
 	}
+	bar.FinishPrint("調査完了しました...")
 	result = files
 	return
 }
