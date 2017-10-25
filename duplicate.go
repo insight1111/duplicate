@@ -57,7 +57,7 @@ func dirList(startDir string) (result []File, err error) {
 			log.Fatal(err)
 		}
 		if file.IsDir() {
-			_t, _ := dirList(filepath.Join(startDir, file.Name()))
+			_t, _ := dirList2(filepath.Join(startDir, file.Name()))
 			files = append(files, _t...)
 			continue
 		} else if fi.Mode()&os.ModeSymlink != 0 {
@@ -75,6 +75,38 @@ func dirList(startDir string) (result []File, err error) {
 		time.Sleep(time.Millisecond)
 	}
 	bar.FinishPrint("調査完了しました...")
+	result = files
+	return
+}
+func dirList2(startDir string) (result []File, err error) {
+	_result, err := ioutil.ReadDir(startDir)
+	// pwd, _ := os.Getwd()
+	if err != nil {
+		return
+	}
+	files := []File{}
+	for _, file := range _result {
+		fi, err := os.Lstat(filepath.Join(startDir, file.Name()))
+		if err != nil {
+			log.Fatal(err)
+		}
+		if file.IsDir() {
+			_t, _ := dirList2(filepath.Join(startDir, file.Name()))
+			files = append(files, _t...)
+			continue
+		} else if fi.Mode()&os.ModeSymlink != 0 {
+			continue
+		}
+		// path := filepath.Join(pwd, startDir, file.Name())
+		path := filepath.Join(startDir, file.Name())
+		f := File{
+			Path:   path,
+			SHA256: utils.GetFileSHA(path),
+			Size:   file.Size(),
+			Create: utils.GetCreateTime(path),
+		}
+		files = append(files, f)
+	}
 	result = files
 	return
 }
