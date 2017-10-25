@@ -11,7 +11,11 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
+	"strings"
 	"time"
+
+	"github.com/ktat/go-pager"
 )
 
 // File ファイルの構造体。
@@ -171,9 +175,25 @@ func main() {
 	}
 
 	fmt.Printf("トータル重複ファイル数: %v ファイルサイズ: %vbyte (うち無駄なファイルサイズ: %vbyte)\n", tf, fz, wz)
+	fmt.Printf("ファイル一覧を表示しますか？(y/n)")
+	stdin := bufio.NewScanner(os.Stdin)
+	stdin.Scan()
+	if stdin.Text() == "y" {
+		var p pager.Pager
+		p.Init()
+		r := []string{}
+		for _, d := range dup {
+			r = append(r, d.Original+"("+strconv.Itoa(len(d.Files))+")")
+		}
+		p.SetContent(strings.Join(r, "\n"))
+		if p.PollEvent() == false {
+			p.Close()
+		}
+
+	}
 	if !*silent {
 		fmt.Print("重複ファイルをショートカットに置き換えますか？(y/n)")
-		stdin := bufio.NewScanner(os.Stdin)
+		stdin = bufio.NewScanner(os.Stdin)
 		stdin.Scan()
 		if stdin.Text() != "y" {
 			return
