@@ -170,8 +170,9 @@ func replaceSymlink(dups []DupFiles) {
 			if f.Path != o {
 				// ext := filepath.Ext(f.Path)
 				// bname := f.Path[:len(f.Path)-len(ext)]
-				_, bname := filepath.Split(f.Path)
-				r := bname + ".lnk"
+				dir, bname := filepath.Split(f.Path)
+				// fmt.Print(bname)
+				r := filepath.Join(dir, bname+".lnk")
 				os.Remove(r)
 				err := os.Symlink(renpath, r)
 				if err != nil {
