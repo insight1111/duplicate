@@ -3,7 +3,6 @@ package main
 
 import (
 	"bufio"
-	"duplicate/utils"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -14,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/insight1111/duplicate/utils"
 
 	"github.com/ktat/go-pager"
 	"gopkg.in/cheggaaa/pb.v1"
