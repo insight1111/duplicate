@@ -20,6 +20,8 @@ import (
 	"gopkg.in/cheggaaa/pb.v1"
 )
 
+// var SHA chan string
+
 // File ファイルの構造体。
 // Path ファイルパス
 // SHA256 そのファイルのSHA256
@@ -66,6 +68,9 @@ func dirList(startDir string) (result []File, err error) {
 		}
 		// path := filepath.Join(pwd, startDir, file.Name())
 		path := filepath.Join(startDir, file.Name())
+		// sha:=make(chan string)
+		// go utils.GetCreateTime(path)
+		// s:=<-sha
 		f := File{
 			Path:   path,
 			SHA256: utils.GetFileSHA(path),
@@ -100,9 +105,13 @@ func dirList2(startDir string) (result []File, err error) {
 		}
 		// path := filepath.Join(pwd, startDir, file.Name())
 		path := filepath.Join(startDir, file.Name())
+		sha := make(chan string)
+		go utils.GetFileSHA2(path, sha)
+		s := <-sha
+
 		f := File{
 			Path:   path,
-			SHA256: utils.GetFileSHA(path),
+			SHA256: s,
 			Size:   file.Size(),
 			Create: utils.GetCreateTime(path),
 		}

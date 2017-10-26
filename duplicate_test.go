@@ -106,3 +106,12 @@ func TestDupList(t *testing.T) {
 	// fmt.Printf("%+v\n", dup[0])
 
 }
+
+func BenchmarkDirList(b *testing.B) {
+	b.ResetTimer()
+	_, _ = dirList("c:/downloads")
+}
+func BenchmarkDirListChannel(b *testing.B) {
+	b.ResetTimer()
+	_, _ = dirList2("c:/downloads")
+}
