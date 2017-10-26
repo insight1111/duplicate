@@ -11,7 +11,7 @@ import (
 
 // GetFileSHA 指定ファイルのSHA256を算出
 func GetFileSHA(filename string) string {
-	f, err := os.Open(filename)
+	f, err := os.OpenFile(filename, os.O_RDONLY, 0777)
 	if err != nil {
 		log.Fatal(err)
 	}
