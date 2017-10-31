@@ -69,6 +69,8 @@ func dirList(startDir string) (result []File, err error) {
 			continue
 		} else if filepath.Ext(file.Name()) == ".lnk" {
 			continue
+		} else if string(file.Name()[0]) == "." {
+			continue
 		}
 		// path := filepath.Join(pwd, startDir, file.Name())
 		path := filepath.Join(startDir, file.Name())
@@ -109,6 +111,8 @@ func dirList2(startDir string) (result []File, err error) {
 		} else if file.Name()[0:2] == "~$" {
 			continue
 		} else if filepath.Ext(file.Name()) == ".lnk" {
+			continue
+		} else if string(file.Name()[0]) == "." {
 			continue
 		}
 		// path := filepath.Join(pwd, startDir, file.Name())

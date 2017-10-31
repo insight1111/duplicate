@@ -46,6 +46,17 @@ func TestDirList(t *testing.T) {
 		t.Errorf("結果に.lnkが含まれています")
 	}
 
+	// .ファイルは除く
+	expect = 1
+	for _, file := range result {
+		if string(filepath.Base(file.Path)[0]) == "." {
+			expect = 0
+		}
+	}
+	if expect == 0 {
+		t.Errorf("結果にドットファイルが含まれています")
+	}
+
 	// 結果はフルパスで入る
 	expect = 0
 	for _, file := range result {
