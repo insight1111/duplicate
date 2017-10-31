@@ -106,6 +106,10 @@ func dirList2(startDir string) (result []File, err error) {
 			continue
 		} else if fi.Mode()&os.ModeSymlink != 0 {
 			continue
+		} else if file.Name()[0:2] == "~$" {
+			continue
+		} else if filepath.Ext(file.Name()) == ".lnk" {
+			continue
 		}
 		// path := filepath.Join(pwd, startDir, file.Name())
 		path := filepath.Join(startDir, file.Name())
